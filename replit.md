@@ -15,6 +15,24 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **AI**: OpenAI via Replit AI Integrations (gpt-5-mini for chat)
+
+## Artifacts
+
+### AI Property Matchmaker (`artifacts/property-matchmaker`)
+- React + Vite frontend at `/`
+- AI-powered chat interface for Pakistani real estate
+- Pages: AI Chat, Browse Properties, My Visits, Market Stats
+- Uses framer-motion, recharts, wouter
+
+### API Server (`artifacts/api-server`)
+- Express 5 REST API at `/api`
+- Routes: /properties, /visits, /chat/message
+
+## Database Schema
+
+- **properties**: id, title, area, city, price, priceFormatted, type, bedrooms, bathrooms, sizeSqFt, imageUrl, description, features, isFeatured, phase, createdAt
+- **visits**: id, propertyId, name, phone, email, visitDate, visitTime, notes, status, createdAt
 
 ## Key Commands
 

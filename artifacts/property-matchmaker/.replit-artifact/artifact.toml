@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI Property Matchmaker"
+version = "1.0.0"
+id = "artifacts/property-matchmaker"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21288
+
+[services.development]
+run = "pnpm --filter @workspace/property-matchmaker run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/property-matchmaker", "run", "build" ]
+publicDir = "artifacts/property-matchmaker/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21288"
+BASE_PATH = "/"

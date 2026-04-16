@@ -1,22 +1,26 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI Property Matchmaker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: properties
+    description: Property listings
+  - name: chat
+    description: AI chat interactions
+  - name: visits
+    description: Property visit scheduling
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +28,166 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /properties:
+    get:
+      operationId: listProperties
+      tags: [properties]
+      summary: List all properties
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: area
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: bedrooms
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/{id}:
+    get:
+      operationId: getProperty
+      tags: [properties]
+      summary: Get property by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Property details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+        "404":
+          description: Property not found
+
+  /properties/featured:
+    get:
+      operationId: getFeaturedProperties
+      tags: [properties]
+      summary: Get featured/top properties
+      responses:
+        "200":
+          description: Featured properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/stats:
+    get:
+      operationId: getPropertyStats
+      tags: [properties]
+      summary: Get summary stats for properties
+      responses:
+        "200":
+          description: Property statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertyStats"
+
+  /chat/message:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a message to the AI property assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageBody"
+      responses:
+        "200":
+          description: AI response with property matches
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
+  /visits:
+    get:
+      operationId: listVisits
+      tags: [visits]
+      summary: List all scheduled visits
+      responses:
+        "200":
+          description: List of visits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Visit"
+    post:
+      operationId: scheduleVisit
+      tags: [visits]
+      summary: Schedule a property visit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleVisitRequest"
+      responses:
+        "201":
+          description: Visit scheduled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visit"
+
+  /visits/{id}:
+    delete:
+      operationId: cancelVisit
+      tags: [visits]
+      summary: Cancel a scheduled visit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Visit cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visit"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +198,203 @@ components:
       required:
         - status
 
+    Property:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        area:
+          type: string
+        city:
+          type: string
+        price:
+          type: number
+        priceFormatted:
+          type: string
+        type:
+          type: string
+        bedrooms:
+          type: integer
+        bathrooms:
+          type: integer
+        sizeSqFt:
+          type: integer
+        imageUrl:
+          type: string
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        isFeatured:
+          type: boolean
+        phase:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - area
+        - city
+        - price
+        - priceFormatted
+        - type
+        - bedrooms
+        - bathrooms
+        - sizeSqFt
+        - imageUrl
+        - description
+        - features
+        - isFeatured
+
+    PropertyStats:
+      type: object
+      properties:
+        totalListings:
+          type: integer
+        avgPrice:
+          type: number
+        cityBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              city:
+                type: string
+              count:
+                type: integer
+            required:
+              - city
+              - count
+        typeBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              count:
+                type: integer
+            required:
+              - type
+              - count
+      required:
+        - totalListings
+        - avgPrice
+        - cityBreakdown
+        - typeBreakdown
+
+    ChatMessageBody:
+      type: object
+      properties:
+        message:
+          type: string
+        sessionId:
+          type: string
+        budget:
+          type: number
+        area:
+          type: string
+        city:
+          type: string
+        propertyType:
+          type: string
+        bedrooms:
+          type: integer
+      required:
+        - message
+        - sessionId
+
+    ChatResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/Property"
+        sessionId:
+          type: string
+        intent:
+          type: string
+        extractedCriteria:
+          type: object
+          properties:
+            budget:
+              type: number
+            area:
+              type: string
+            city:
+              type: string
+            propertyType:
+              type: string
+            bedrooms:
+              type: integer
+      required:
+        - message
+        - properties
+        - sessionId
+        - intent
+
+    ScheduleVisitRequest:
+      type: object
+      properties:
+        propertyId:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        visitDate:
+          type: string
+        visitTime:
+          type: string
+        notes:
+          type: string
+      required:
+        - propertyId
+        - name
+        - phone
+        - visitDate
+        - visitTime
+
+    Visit:
+      type: object
+      properties:
+        id:
+          type: integer
+        propertyId:
+          type: integer
+        property:
+          $ref: "#/components/schemas/Property"
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        visitDate:
+          type: string
+        visitTime:
+          type: string
+        notes:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - propertyId
+        - name
+        - phone
+        - visitDate
+        - visitTime
+        - status
