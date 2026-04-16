@@ -1,10 +1,18 @@
-import { Building2, BedDouble, Bath, Square, MapPin } from "lucide-react";
+import { BedDouble, Bath, Square, MapPin, MessageCircle } from "lucide-react";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Property } from "@workspace/api-client-react";
 import { formatCurrency } from "@/lib/format-currency";
+
+const WHATSAPP_NUMBER = "923427163349";
+
+function buildWhatsAppUrl(property: Property): string {
+  const location = [property.phase, property.area, property.city].filter(Boolean).join(", ");
+  const message = `Hi, I am interested in this property:\n\n*${property.title}*\nLocation: ${location}\nPrice: ${property.priceFormatted || formatCurrency(property.price)}\n\nI would like to schedule a visit.`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 interface PropertyCardProps {
   property: Property;
@@ -80,19 +88,20 @@ export function PropertyCard({ property, onScheduleVisit, isCompact = false }: P
         )}
       </CardContent>
       
-      {onScheduleVisit && (
-        <CardFooter className="p-4 pt-0">
-          <Button 
-            className="w-full font-medium" 
-            onClick={(e) => {
-              e.preventDefault();
-              onScheduleVisit(property);
-            }}
-          >
-            Schedule Visit
+      <CardFooter className="p-4 pt-0">
+        <a
+          href={buildWhatsAppUrl(property)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Button className="w-full font-medium gap-2 bg-[#25D366] hover:bg-[#20b858] text-white border-0">
+            <MessageCircle className="h-4 w-4" />
+            Schedule Visit on WhatsApp
           </Button>
-        </CardFooter>
-      )}
+        </a>
+      </CardFooter>
     </Card>
   );
 }

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { PropertyCard } from "@/components/property-card";
-import { ScheduleVisitModal } from "@/components/schedule-visit-modal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSendChatMessage, Property } from "@workspace/api-client-react";
@@ -23,9 +22,7 @@ export default function ChatPage() {
     }
   ]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState(`sess_${Math.random().toString(36).substring(2, 9)}`);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sessionId] = useState(`sess_${Math.random().toString(36).substring(2, 9)}`);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const sendChat = useSendChatMessage();
@@ -77,11 +74,6 @@ export default function ChatPage() {
     }
   };
 
-  const handleScheduleVisit = (property: Property) => {
-    setSelectedProperty(property);
-    setIsModalOpen(true);
-  };
-
   return (
     <div className="flex flex-col h-full bg-accent/30 relative">
       <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32" ref={scrollRef}>
@@ -125,7 +117,6 @@ export default function ChatPage() {
                           >
                             <PropertyCard 
                               property={property} 
-                              onScheduleVisit={handleScheduleVisit}
                               isCompact 
                             />
                           </motion.div>
@@ -178,11 +169,6 @@ export default function ChatPage() {
         </div>
       </div>
       
-      <ScheduleVisitModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        property={selectedProperty} 
-      />
     </div>
   );
 }

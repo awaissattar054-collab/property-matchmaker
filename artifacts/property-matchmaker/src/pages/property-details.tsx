@@ -1,12 +1,17 @@
 import { useParams, Link } from "wouter";
-import { useState } from "react";
-import { ArrowLeft, MapPin, BedDouble, Bath, Square, Check, Calendar, Phone } from "lucide-react";
+import { ArrowLeft, MapPin, BedDouble, Bath, Square, Check, Calendar, MessageCircle } from "lucide-react";
 import { useGetProperty } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ScheduleVisitModal } from "@/components/schedule-visit-modal";
 import { formatCurrency } from "@/lib/format-currency";
+
+const WHATSAPP_NUMBER = "923427163349";
+
+function buildWhatsAppUrl(title: string, location: string, price: string): string {
+  const message = `Hi, I am interested in this property:\n\n*${title}*\nLocation: ${location}\nPrice: ${price}\n\nI would like to schedule a visit.`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -15,8 +20,6 @@ export default function PropertyDetailsPage() {
   const { data: property, isLoading } = useGetProperty(propertyId, {
     query: { enabled: !!propertyId }
   });
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -45,6 +48,10 @@ export default function PropertyDetailsPage() {
     );
   }
 
+  const location = [property.phase, property.area, property.city].filter(Boolean).join(", ");
+  const price = property.priceFormatted || formatCurrency(property.price);
+  const whatsAppUrl = buildWhatsAppUrl(property.title, location, price);
+
   return (
     <div className="pb-20">
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border p-4 px-6 md:px-8">
@@ -55,15 +62,17 @@ export default function PropertyDetailsPage() {
               Back
             </Button>
           </Link>
-          <div className="font-bold text-lg hidden md:block">
-            {property.priceFormatted || formatCurrency(property.price)}
-          </div>
-          <Button onClick={() => setIsModalOpen(true)}>Schedule Visit</Button>
+          <div className="font-bold text-lg hidden md:block">{price}</div>
+          <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer">
+            <Button className="gap-2 bg-[#25D366] hover:bg-[#20b858] text-white border-0">
+              <MessageCircle className="h-4 w-4" />
+              Schedule Visit
+            </Button>
+          </a>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-        {/* Header & Image */}
         <div className="space-y-6">
           <div className="relative aspect-video md:aspect-[21/9] rounded-2xl overflow-hidden bg-muted">
             <img 
@@ -87,7 +96,7 @@ export default function PropertyDetailsPage() {
                     </Badge>
                     <span className="flex items-center gap-1 text-sm font-medium">
                       <MapPin className="w-4 h-4" />
-                      {property.phase ? `${property.phase}, ` : ""}{property.area}, {property.city}
+                      {location}
                     </span>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight">
@@ -96,15 +105,12 @@ export default function PropertyDetailsPage() {
                 </div>
                 <div className="text-white">
                   <div className="text-sm opacity-80 mb-1">Asking Price</div>
-                  <div className="text-3xl md:text-4xl font-bold text-secondary">
-                    {property.priceFormatted || formatCurrency(property.price)}
-                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-secondary">{price}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Key Specs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center gap-2 shadow-sm">
               <BedDouble className="w-6 h-6 text-primary" />
@@ -127,13 +133,15 @@ export default function PropertyDetailsPage() {
                 <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Sq Ft Area</div>
               </div>
             </div>
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 shadow-sm cursor-pointer hover-elevate transition-all" onClick={() => setIsModalOpen(true)}>
-              <Calendar className="w-6 h-6 text-primary" />
-              <div>
-                <div className="text-sm font-bold text-primary">Book a Tour</div>
-                <div className="text-xs text-muted-foreground mt-1">Available 7 days</div>
+            <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer">
+              <div className="bg-[#25D366]/10 border border-[#25D366]/30 rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 shadow-sm cursor-pointer hover-elevate transition-all h-full">
+                <Calendar className="w-6 h-6 text-[#25D366]" />
+                <div>
+                  <div className="text-sm font-bold text-[#25D366]">Book a Tour</div>
+                  <div className="text-xs text-muted-foreground mt-1">Via WhatsApp</div>
+                </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 
@@ -165,12 +173,15 @@ export default function PropertyDetailsPage() {
             <div className="sticky top-24 bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
               <div>
                 <h3 className="font-serif font-bold text-xl">Interested in this property?</h3>
-                <p className="text-sm text-muted-foreground mt-1">Our agents are ready to show you around.</p>
+                <p className="text-sm text-muted-foreground mt-1">Message us on WhatsApp to arrange a visit.</p>
               </div>
               
-              <Button className="w-full text-base py-6" onClick={() => setIsModalOpen(true)}>
-                Schedule a Visit
-              </Button>
+              <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer" className="block">
+                <Button className="w-full text-base py-6 gap-2 bg-[#25D366] hover:bg-[#20b858] text-white border-0">
+                  <MessageCircle className="h-5 w-5" />
+                  Schedule a Visit on WhatsApp
+                </Button>
+              </a>
               
               <Separator />
               
@@ -184,21 +195,17 @@ export default function PropertyDetailsPage() {
                     <div className="text-xs text-muted-foreground">Premium Property Specialist</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full gap-2">
-                  <Phone className="w-4 h-4" />
-                  Request Callback
-                </Button>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="block">
+                  <Button variant="outline" className="w-full gap-2">
+                    <MessageCircle className="w-4 h-4" />
+                    Chat on WhatsApp
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <ScheduleVisitModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        property={property} 
-      />
     </div>
   );
 }

@@ -1,20 +1,15 @@
 import { useState } from "react";
-import { Search, Filter, SlidersHorizontal, Loader2, Star } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, Star } from "lucide-react";
 import { PropertyCard } from "@/components/property-card";
-import { ScheduleVisitModal } from "@/components/schedule-visit-modal";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useListProperties, useGetFeaturedProperties, Property } from "@workspace/api-client-react";
+import { useListProperties, useGetFeaturedProperties } from "@workspace/api-client-react";
 
 export default function PropertiesPage() {
   const [city, setCity] = useState<string>("all");
   const [type, setType] = useState<string>("all");
   const [bedrooms, setBedrooms] = useState<string>("all");
   
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const { data: properties, isLoading } = useListProperties({
     ...(city !== "all" && { city }),
     ...(type !== "all" && { type }),
@@ -22,11 +17,6 @@ export default function PropertiesPage() {
   });
 
   const { data: featuredProperties } = useGetFeaturedProperties();
-
-  const handleScheduleVisit = (property: Property) => {
-    setSelectedProperty(property);
-    setIsModalOpen(true);
-  };
 
   const isFiltering = city !== "all" || type !== "all" || bedrooms !== "all";
 
@@ -106,7 +96,6 @@ export default function PropertiesPage() {
               <PropertyCard 
                 key={property.id} 
                 property={property} 
-                onScheduleVisit={handleScheduleVisit} 
               />
             ))}
           </div>
@@ -130,7 +119,6 @@ export default function PropertiesPage() {
               <PropertyCard 
                 key={property.id} 
                 property={property} 
-                onScheduleVisit={handleScheduleVisit} 
               />
             ))}
           </div>
@@ -150,11 +138,6 @@ export default function PropertiesPage() {
         )}
       </div>
 
-      <ScheduleVisitModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        property={selectedProperty} 
-      />
     </div>
   );
 }
