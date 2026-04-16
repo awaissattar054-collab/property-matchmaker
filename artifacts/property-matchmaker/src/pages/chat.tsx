@@ -1,10 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, MessageCircle } from "lucide-react";
 import { PropertyCard } from "@/components/property-card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSendChatMessage, Property } from "@workspace/api-client-react";
+
+const WHATSAPP_NUMBER = "923427163349";
+
+function buildVisitWhatsAppUrl(properties: Property[]): string {
+  const names = properties.map(p => p.title).join(", ");
+  const message = `Hi, I found these properties through Estate AI and would like to schedule a visit:\n\n${names}\n\nPlease let me know when I can arrange a viewing.`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 interface Message {
   id: string;
@@ -105,8 +113,8 @@ export default function ChatPage() {
                   </div>
                   
                   {message.properties && message.properties.length > 0 && (
-                    <div className="mt-4 w-full">
-                      <div className="flex overflow-x-auto pb-4 gap-4 snap-x snap-mandatory hide-scrollbar">
+                    <div className="mt-4 w-full space-y-4">
+                      <div className="flex overflow-x-auto pb-2 gap-4 snap-x snap-mandatory hide-scrollbar">
                         {message.properties.map((property, pIdx) => (
                           <motion.div 
                             key={property.id}
@@ -122,6 +130,26 @@ export default function ChatPage() {
                           </motion.div>
                         ))}
                       </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.3 }}
+                        className="bg-card border border-border rounded-2xl rounded-tl-none px-4 py-3 shadow-sm space-y-3"
+                      >
+                        <p className="text-sm text-card-foreground leading-relaxed">
+                          Would you like to schedule a visit? Click the button below to continue on WhatsApp.
+                        </p>
+                        <a
+                          href={buildVisitWhatsAppUrl(message.properties)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button className="gap-2 bg-[#25D366] hover:bg-[#20b858] text-white border-0 w-full sm:w-auto">
+                            <MessageCircle className="h-4 w-4" />
+                            Schedule a Visit on WhatsApp
+                          </Button>
+                        </a>
+                      </motion.div>
                     </div>
                   )}
                 </div>
