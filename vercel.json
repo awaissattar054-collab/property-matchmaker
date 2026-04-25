@@ -1,15 +1,17 @@
+cat > vercel.json << 'EOF'
 {
   "version": 2,
   "builds": [
     {
-      "src": "lib/integrations-openai-ai-server/dist/index.mjs",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "lib/integrations-openai-ai-server/dist/index.mjs"
+      "dest": "dist/index.js"
     }
   ]
 }
+EOF
